@@ -12,8 +12,9 @@ if (existsSync(".env")) {
   }
 }
 
-const url = env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || "";
-const key = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY || env.SUPABASE_KEY || "";
+const pick = (...names) => names.map((n) => (env[n] || "").trim()).find(Boolean) || "";
+const url = pick("NEXT_PUBLIC_SUPABASE_URL", "SUPABASE_URL", "VITE_SUPABASE_URL");
+const key = pick("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_ANON_KEY", "SUPABASE_KEY", "VITE_SUPABASE_ANON_KEY");
 if (/^sb_secret_/.test(key) || /service_role/.test(key)) {
   console.error("✗ Esa es la llave secreta. Usa la publishable (sb_publishable_…) o la anon.");
   process.exit(1);
@@ -25,4 +26,13 @@ cpSync("index.html", "dist/index.html");
 cpSync("fotos", "dist/fotos", { recursive: true });
 writeFileSync("dist/config.js", `window.MONSE_CONFIG = ${JSON.stringify({ SUPABASE_URL: url, SUPABASE_KEY: key })};\n`);
 
-console.log(url && key ? `✓ dist/ lista, conectada a ${url}` : "⚠ dist/ lista en MODO DEMO (faltan las llaves en .env)");
+if (url && key) {
+  console.log(`✓ dist/ lista, conectada a ${url}`);
+} else {
+  // Ayuda para el log del hosting: muestra solo los NOMBRES de variables, nunca sus valores
+  const vistas = Object.keys(env).filter((k) => k.includes("SUPABASE"));
+  console.log("⚠ dist/ lista en MODO DEMO: faltan las llaves de Supabase.");
+  console.log(`  URL: ${url ? "ok" : "falta NEXT_PUBLIC_SUPABASE_URL"} · Llave: ${key ? "ok" : "falta NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"}`);
+  console.log(`  Variables con SUPABASE que ve este build: ${vistas.length ? vistas.join(", ") : "ninguna"}`);
+  if (env.VERCEL) console.log(`  En Vercel: Settings → Environment Variables, marca el entorno "${env.VERCEL_ENV || "?"}" y vuelve a hacer deploy.`);
+}
