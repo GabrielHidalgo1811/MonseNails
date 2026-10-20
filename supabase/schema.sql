@@ -35,7 +35,7 @@ create table if not exists public.reservas (
   servicio_id uuid not null references public.servicios(id) on delete restrict,
   clienta_id  uuid not null references public.clientas(id) on delete cascade,
   fecha       date not null,
-  hora        smallint not null check (hora in (10, 12, 14, 16, 18)),   -- inicio del bloque de 2 horas
+  hora        smallint not null check (hora between 0 and 23),          -- hora de inicio del bloque
   estado      text not null default 'confirmada' check (estado in ('confirmada', 'completada', 'cancelada')),
   precio      integer not null,                                         -- precio al momento de reservar
   gratis      boolean not null default false,                           -- 6.º servicio gratis
@@ -44,6 +44,16 @@ create table if not exists public.reservas (
 -- un solo bloque activo por fecha y hora (evita dobles reservas)
 create unique index if not exists reservas_bloque_uk on public.reservas (fecha, hora) where estado <> 'cancelada';
 create index if not exists reservas_clienta_idx on public.reservas (clienta_id);
+
+-- Jornada laboral: días y bloques en que atiende María (editable desde el panel, también en migraciones/003)
+create table if not exists public.ajustes (
+  id             smallint primary key default 1 check (id = 1),
+  dias           smallint[] not null default '{1,2,3,4,5,6}',      -- 0 = domingo … 6 = sábado
+  bloques        smallint[] not null default '{10,12,14,16,18}',   -- hora de inicio de cada bloque
+  duracion       smallint   not null default 2 check (duracion between 1 and 4),  -- horas por bloque
+  actualizado_en timestamptz not null default now()
+);
+insert into public.ajustes (id) values (1) on conflict (id) do nothing;
 
 -- ---------- 2. Administradoras (quién puede entrar al panel) ----------
 create table if not exists public.admins (
@@ -60,6 +70,13 @@ alter table public.servicios enable row level security;
 alter table public.clientas  enable row level security;
 alter table public.reservas  enable row level security;
 alter table public.admins    enable row level security;
+alter table public.ajustes   enable row level security;
+
+drop policy if exists "ajustes: todos leen" on public.ajustes;
+create policy "ajustes: todos leen" on public.ajustes for select using (true);
+drop policy if exists "ajustes: admin escribe" on public.ajustes;
+create policy "ajustes: admin escribe" on public.ajustes
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "servicios: ver activos o admin" on public.servicios;
 create policy "servicios: ver activos o admin" on public.servicios
@@ -95,22 +112,24 @@ returns integer language sql stable security definer set search_path = public as
              and c.telefono_norm = right(regexp_replace(p_telefono, '\D', '', 'g'), 8)));
 $$;
 
--- Crear una reserva: valida el bloque, registra a la clienta y aplica la regla 5 + 1 gratis
+-- Crear una reserva: valida día y bloque contra la jornada, registra a la clienta y aplica la regla 5 + 1 gratis
 create or replace function public.crear_reserva(
   p_servicio uuid, p_fecha date, p_hora smallint,
   p_nombre text, p_apellido text, p_correo text, p_telefono text
 ) returns json language plpgsql security definer set search_path = public as $$
 declare
   v_hoy      date := (now() at time zone 'America/Santiago')::date;
+  v_aj       public.ajustes;
   v_precio   integer;
   v_clienta  uuid;
   v_visitas  integer;
   v_gratis   boolean;
   v_id       uuid;
 begin
+  select * into v_aj from public.ajustes where id = 1;
   if p_fecha <= v_hoy or p_fecha > v_hoy + 60 then raise exception 'Elige un día entre mañana y los próximos 60 días.'; end if;
-  if extract(dow from p_fecha) = 0 then raise exception 'Los domingos el studio está cerrado.'; end if;
-  if p_hora not in (10, 12, 14, 16, 18) then raise exception 'Ese bloque no existe.'; end if;
+  if not (extract(dow from p_fecha)::smallint = any (coalesce(v_aj.dias, '{1,2,3,4,5,6}'))) then raise exception 'Ese día el studio está cerrado.'; end if;
+  if not (p_hora = any (coalesce(v_aj.bloques, '{10,12,14,16,18}'))) then raise exception 'Ese bloque no existe.'; end if;
   if coalesce(trim(p_nombre), '') = '' or coalesce(trim(p_apellido), '') = '' then raise exception 'Faltan nombre o apellido.'; end if;
   if p_correo !~* '^[^@\s]+@[^@\s]+\.[^@\s]+$' then raise exception 'El correo no es válido.'; end if;
   if length(regexp_replace(p_telefono, '\D', '', 'g')) < 8 then raise exception 'El teléfono no es válido.'; end if;

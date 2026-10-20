@@ -31,7 +31,8 @@ const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "
 const DIAS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const pad = (n: number) => String(n).padStart(2, "0");
 const clp = (n: number) => "$" + Math.round(n).toLocaleString("es-CL");
-const bloque = (h: number) => `${pad(h)}:00 – ${pad(h + 2)}:00`;
+let duracion = 2; // horas por bloque, se lee de la tabla ajustes
+const bloque = (h: number) => `${pad(h)}:00 – ${pad(h + duracion)}:00`;
 const fechaLarga = (s: string) => {
   const [y, m, d] = s.split("-").map(Number);
   return `${DIAS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${d} de ${MESES[m - 1]}`;
@@ -42,10 +43,12 @@ Deno.serve(async (req) => {
   const { type, record, old_record } = await req.json() as { type: string; record: Reserva; old_record?: Reserva };
   if (!record?.id) return Response.json({ ok: false, error: "sin reserva" }, { status: 400 });
 
-  const [{ data: servicio }, { data: clienta }] = await Promise.all([
+  const [{ data: servicio }, { data: clienta }, { data: ajustes }] = await Promise.all([
     sb.from("servicios").select("nombre").eq("id", record.servicio_id).single(),
     sb.from("clientas").select("nombre, apellido, correo, telefono").eq("id", record.clienta_id).single(),
+    sb.from("ajustes").select("duracion").eq("id", 1).maybeSingle(),
   ]);
+  duracion = ajustes?.duracion ?? 2;
   if (!clienta) return Response.json({ ok: false, error: "clienta no encontrada" }, { status: 404 });
   const s = servicio?.nombre ?? "Servicio";
   const c = clienta as Clienta;

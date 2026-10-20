@@ -8,6 +8,7 @@
 | `fotos/` | Las fotos de referencia de los servicios y la foto de María. |
 | `supabase/schema.sql` | La base de datos: tablas, seguridad, reglas de reserva y fidelidad, y fotos. |
 | `supabase/migraciones/002_calendario_y_avisos.sql` | Actualización para quien ya corrió `schema.sql`: calendario en vivo y revisión de permisos. |
+| `supabase/migraciones/003_jornada_laboral.sql` | Actualización para quien ya corrió `schema.sql`: jornada laboral editable desde el panel. |
 | `supabase/functions/notificar-reserva/` | Avisos automáticos: correo a la clienta y WhatsApp a María. |
 | `build.mjs` | Arma la carpeta `dist/` para publicar y pone ahí las llaves de Supabase. |
 | `.env.example` | Modelo del archivo `.env` donde van las llaves. El `.env` real no se sube a GitHub. |
@@ -50,15 +51,16 @@ Sin llaves, la web funciona en **modo demo** con datos de ejemplo.
 - Las clientas entran al link, eligen un servicio, un día y un bloque de 2 horas, y dejan nombre, apellido, correo y teléfono.
 - La reserva queda guardada en Supabase, y aparece un botón para mandarle el aviso a María por WhatsApp (+56 9 2610 8745).
 - María entra a `tu-link/#panel` con su correo y contraseña. Lo primero que ve es **su calendario de la semana**. Si toca un bloque, ve todos los datos de la clienta. Puede arrastrar el bloque a otro día y hora (en el celular lo hace desde "Mover a otro día u hora") o cancelarlo para liberarlo. En las otras pestañas ve los ingresos, el servicio que más y menos plata deja, las reservas, las clientas con sus sellos y los servicios. También puede marcar las citas como completadas o canceladas, cambiar precios y fotos, y agregar o quitar servicios.
+- En la pestaña **Jornada laboral** María elige qué días atiende (incluido el domingo), desde y hasta qué hora, cuánto dura cada bloque (1, 2 o 3 horas) y qué bloques se pueden reservar (por ejemplo, deja libre la hora de almuerzo). Al guardar, la web y el calendario cambian al tiro. Las horas ya reservadas no se borran: si quedan fuera de la nueva jornada, el panel lo avisa para que las mueva o cancele.
 
 ## Reglas que ya están en la base de datos
-- Hay bloques a las 10, 12, 14, 16 y 18 h, de lunes a sábado, para reservar desde mañana hasta 60 días adelante. Para cambiarlos, edita `STUDIO.bloques` en `index.html` y los números `(10, 12, 14, 16, 18)` en `schema.sql`.
+- Al principio hay bloques a las 10, 12, 14, 16 y 18 h, de lunes a sábado. María los cambia desde **Jornada laboral** y la base de datos solo acepta reservas en los días y bloques que ella dejó activos (tabla `ajustes`). Se puede reservar desde mañana hasta 60 días adelante.
 - Un bloque no se puede reservar dos veces. Si dos personas reservan a la vez, la segunda recibe un aviso para elegir otro.
 - Cada clienta se reconoce por su correo o su teléfono. Su 6.º servicio (y el 12.º, el 18.º…) queda marcado como **gratis** y no suma a los ingresos.
 - Las visitas no ven datos de otras clientas. Solo pueden ver los servicios activos y qué bloques están ocupados.
 
 ## Si una reserva no aparece en el panel
-1. **¿Ya corriste la actualización 002?** Si ya tenías la base de datos creada, pega y corre `supabase/migraciones/002_calendario_y_avisos.sql` en SQL Editor. Al final muestra qué correos pueden entrar al panel.
+1. **¿Ya corriste las actualizaciones 002 y 003?** Si ya tenías la base de datos creada, pega y corre `supabase/migraciones/002_calendario_y_avisos.sql` y después `003_jornada_laboral.sql` en SQL Editor. La 002 muestra al final qué correos pueden entrar al panel.
 2. **¿El correo de María está autorizado?** El panel ahora lo revisa. Si dice *"Este correo no está autorizado"*, te muestra la línea exacta que hay que correr en SQL Editor. Este suele ser el problema: el `schema.sql` traía `maria@ejemplo.cl` como ejemplo.
 3. **¿La web está en modo demo?** Si arriba dice "Modo demo", el hosting no tiene las variables `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Agrégalas y vuelve a publicar. En modo demo, las reservas solo quedan en el navegador de quien reservó.
 
