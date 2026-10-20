@@ -1,7 +1,7 @@
 // Supabase Edge Function: avisos automáticos de reservas.
 //
 // Se dispara con un Database Webhook de la tabla `reservas` (INSERT y UPDATE):
-//   • reserva nueva   → correo de confirmación a la clienta + WhatsApp a María
+//   • reserva nueva   → correo de confirmación a la clienta + Telegram a María
 //   • hora movida     → correo a la clienta con el nuevo día y bloque
 //   • hora cancelada  → correo a la clienta
 //
@@ -9,10 +9,9 @@
 //   BREVO_API_KEY      correo con Brevo (gratis, 300 al día, no necesita dominio propio)
 //   RESEND_API_KEY     alternativa a Brevo (necesita un dominio verificado)
 //   EMAIL_FROM         remitente verificado, por ejemplo monsenails.studio@gmail.com
-//   CALLMEBOT_APIKEY   WhatsApp a María con CallMeBot (gratis)
+//   TELEGRAM_BOT_TOKEN aviso instantáneo por Telegram (gratis): token que entrega @BotFather
+//   TELEGRAM_CHAT_ID   a quién le llega: el número que muestra @userinfobot (puede ir más de uno, separados por coma)
 //   AVISO_CORREO       opcional: correo del studio que también recibe cada reserva nueva
-//   MARIA_WHATSAPP     a quién le llega el WhatsApp (debe ser el mismo número que activó CallMeBot).
-//                      Por defecto +56987380493 (Gabo, para probar); para María: +56926108745
 // SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY ya vienen incluidas en Supabase.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -63,7 +62,7 @@ Deno.serve(async (req) => {
       tareas.push(enviarCorreo({ nombre: "María", apellido: "", correo: env("AVISO_CORREO"), telefono: "" }, `Nueva reserva: ${c.nombre} ${c.apellido}`,
         plantilla({ ...c, nombre: "María" }, `${c.nombre} ${c.apellido} reservó`, record, s, `Contacto: ${c.telefono} · ${c.correo}`)));
     }
-    tareas.push(whatsappMaria(
+    tareas.push(avisoTelegram(
       `Nueva reserva en ${STUDIO.nombre}\n` +
       `• ${s} (${record.gratis ? "GRATIS por fidelidad" : clp(record.precio)})\n` +
       `• ${fechaLarga(record.fecha)}, ${bloque(record.hora)}\n` +
@@ -106,13 +105,17 @@ async function enviarCorreo(c: Clienta, asunto: string, html: string) {
   }
 }
 
-async function whatsappMaria(texto: string) {
-  if (!env("CALLMEBOT_APIKEY")) throw new Error("Falta CALLMEBOT_APIKEY");
-  const phone = "+" + (env("MARIA_WHATSAPP") || "+56987380493").replace(/\D/g, "").replace(/^(?=9\d{8}$)/, "56");
-  const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(texto)}&apikey=${encodeURIComponent(env("CALLMEBOT_APIKEY"))}`;
-  const r = await fetch(url);
-  const body = await r.text();
-  if (!r.ok || /error/i.test(body)) throw new Error("CallMeBot: " + body.slice(0, 200));
+async function avisoTelegram(texto: string) {
+  const token = env("TELEGRAM_BOT_TOKEN"), chats = env("TELEGRAM_CHAT_ID").split(",").map((x) => x.trim()).filter(Boolean);
+  if (!token || !chats.length) throw new Error("Falta TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID");
+  for (const chat_id of chats) {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ chat_id, text: texto }),
+    });
+    if (!r.ok) throw new Error("Telegram: " + (await r.text()).slice(0, 200));
+  }
 }
 
 function plantilla(c: Clienta, titulo: string, r: Reserva, servicio: string, nota: string) {
