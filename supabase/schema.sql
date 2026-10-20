@@ -153,6 +153,24 @@ grant execute on function public.bloques_ocupados(date) to anon, authenticated;
 grant execute on function public.visitas_de(text, text) to anon, authenticated;
 grant execute on function public.crear_reserva(uuid, date, smallint, text, text, text, text) to anon, authenticated;
 
+-- ---------- 4b. Panel: permiso y tiempo real (también en migraciones/002) ----------
+-- El panel pregunta si el correo con que entró María está autorizado
+create or replace function public.soy_admin()
+returns boolean language sql stable security definer set search_path = public as $$
+  select public.is_admin();
+$$;
+grant execute on function public.soy_admin() to authenticated;
+
+-- El panel se actualiza solo cuando entra una reserva nueva (Realtime)
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (select 1 from pg_publication_tables
+                     where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'reservas') then
+    alter publication supabase_realtime add table public.reservas;
+  end if;
+end $$;
+
 -- ---------- 5. Fotos (Storage) ----------
 insert into storage.buckets (id, name, public) values ('fotos', 'fotos', true)
 on conflict (id) do nothing;

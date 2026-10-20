@@ -294,6 +294,68 @@ tr:last-child td{border-bottom:0}
   table.resp td.acts-cell:empty, table.resp td.acts-cell:has(.row-actions:empty){display:none}
   .toolbar input{flex:1;min-width:0}
 }
+/* ---------- calendario ---------- */
+.p-sub{margin-top:8px;font-size:14px;color:var(--ink-2);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.linkish{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.cal-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-nav h3{font-weight:400;font-size:20px;color:var(--accent);min-width:150px;text-align:center}
+.cal{display:grid;grid-template-columns:72px repeat(6,minmax(0,1fr));gap:6px}
+.cal-head{text-align:center;padding:6px 0 10px;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.cal-head small,.cal-day small{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.cal-head b{display:block;font-size:22px;font-weight:400;color:var(--ink)}
+.cal-head.today b{color:var(--accent-ink);background:var(--accent);border-radius:999px;width:38px;margin:2px auto 0}
+.cal-hour{font-size:14px;color:var(--ink-2);padding-top:10px}
+.cal-hour small{display:block;color:var(--ink-3);font-size:12px}
+.cal-cell,.cal-res{min-height:96px;border-radius:14px;padding:10px 12px;min-width:0}
+.cal-cell{border:1px dashed var(--line);color:var(--ink-3);font-size:12px;display:flex;align-items:flex-end;justify-content:flex-end;transition:background .15s,border-color .15s}
+.cal-cell.past{border-style:solid;background:repeating-linear-gradient(135deg,transparent 0 6px,var(--soft) 6px 7px)}
+.cal-cell.drop-ok{background:var(--soft);border:1.5px solid var(--accent);color:var(--accent)}
+.cal-res{display:flex;flex-direction:column;gap:2px;text-align:left;cursor:pointer;border:1px solid transparent;font-size:13px;line-height:1.35;overflow:hidden}
+.cal-res b{font-weight:500;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-res span{color:inherit;opacity:.85;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.cal-res em{font-style:normal;margin-top:auto;font-size:12px;opacity:.8}
+.cal-res.est-confirmada{background:var(--accent);color:var(--accent-ink)}
+.cal-res.est-completada{background:var(--ok-bg);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 25%,transparent)}
+.cal-res[draggable="true"]{cursor:grab}
+.cal-res.dragging{opacity:.45}
+.cal-res:hover{filter:brightness(1.06)}
+.cal-days{display:none}
+.cal-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--ink-3)}
+.cal-legend span{display:flex;align-items:center;gap:6px}
+.lg{width:14px;height:14px;border-radius:4px;display:inline-block}
+.lg.est-confirmada{background:var(--accent)}.lg.est-completada{background:var(--ok-bg);border:1px solid var(--ok)}.lg.libre{border:1px dashed var(--ink-3)}
+.scrim.center{justify-content:center;align-items:center;padding:16px}
+.modal{background:var(--bg);width:min(520px,100%);max-height:100%;overflow-y:auto;border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow);animation:slide .22s ease-out}
+.modal .dr-head h2{font-family:var(--display);font-size:32px;color:var(--accent)}
+.det{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;margin:0;font-size:15px}
+.det dt{color:var(--ink-3);font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding-top:3px}
+.det dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.det-acts{display:flex;gap:8px;flex-wrap:wrap}
+.move{padding-top:14px;border-top:1px solid var(--line)}
+.move-row{display:flex;gap:8px;flex-wrap:wrap}
+.move-row input,.move-row select{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 12px;min-width:0;flex:1}
+.det-danger{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--ink-2)}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+@media (max-width:760px){
+  .hide-sm{display:none}
+  .cal-days{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:12px}
+  .cal-day{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:6px 0;cursor:pointer;text-align:center;line-height:1.2;position:relative}
+  .cal-day b{display:block;font-size:20px;font-weight:400}
+  .cal-day i{position:absolute;top:-6px;right:-4px;font-style:normal;font-size:11px;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:var(--accent-2);color:#fff}
+  .cal-day i:empty{display:none}
+  .cal-day.today small{color:var(--accent)}
+  .cal-day[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .cal{grid-template-columns:60px 1fr}
+  .cal-corner,.cal-head{display:none}
+  .cal[data-show="0"] [data-col]:not([data-col="0"]),.cal[data-show="1"] [data-col]:not([data-col="1"]),.cal[data-show="2"] [data-col]:not([data-col="2"]),
+  .cal[data-show="3"] [data-col]:not([data-col="3"]),.cal[data-show="4"] [data-col]:not([data-col="4"]),.cal[data-show="5"] [data-col]:not([data-col="5"]){display:none}
+  .cal-cell,.cal-res{min-height:76px}
+  .cal-nav h3{min-width:0;font-size:18px}
+  .modal{padding:20px 18px;border-radius:20px}
+  .scrim.center{align-items:flex-end;padding:0}
+  .scrim.center .modal{border-radius:22px 22px 0 0;max-height:92%;padding-bottom:max(20px, env(safe-area-inset-bottom, 0px))}
+}
 .toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;z-index:60}
 </style>
 </head>
@@ -319,6 +381,7 @@ const STUDIO = {
   direccion: "Carlos Canut de Bon 2879",
   telefono: "+56 9 2610 8745",
   whatsapp: "56926108745",
+  avisosAutomaticos: false,          // true cuando la Edge Function "notificar-reserva" esté activa (ver README)
   bloques: [10, 12, 14, 16, 18],   // inicio de cada bloque de 2 horas
   duracionBloque: 2,
   diasAbiertos: [1, 2, 3, 4, 5, 6], // lunes a sábado
@@ -413,6 +476,11 @@ const mockDb = {
   async listarReservas() { return state.reservas.slice().sort(byDate); },
   async listarClientas() { return state.clientas.slice(); },
   async cambiarEstado(id, estado) { state.reservas.find(r => r.id === id).estado = estado; persist(); },
+  async moverReserva(id, fecha, hora) {
+    if (state.reservas.some(r => r.id !== id && r.fecha === fecha && r.hora === hora && r.estado !== "cancelada")) throw new Error("Ese bloque ya está ocupado.");
+    Object.assign(state.reservas.find(r => r.id === id), { fecha, hora }); persist();
+  },
+  async acceso() { return { email: "maria@demo", admin: true }; },
   async reiniciarDemo() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} state = seedState(); },
   async subirFoto(file) { return new Promise((ok, bad) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = bad; fr.readAsDataURL(file); }); },
   async sesion() { return true; }, async entrar() {}, async salir() {}
@@ -444,6 +512,16 @@ const supaDb = {
   async listarReservas() { return must(await sb.from("reservas").select("*").order("fecha").order("hora")).map(fromRes); },
   async listarClientas() { return must(await sb.from("clientas").select("id, nombre, apellido, correo, telefono")); },
   async cambiarEstado(id, estado) { must(await sb.from("reservas").update({ estado }).eq("id", id)); },
+  async moverReserva(id, fecha, hora) {
+    const { error } = await sb.from("reservas").update({ fecha, hora }).eq("id", id);
+    if (error) throw new Error(error.code === "23505" ? "Ese bloque ya está ocupado." : error.message);
+  },
+  // Quién entró y si su correo está en la tabla admins (null = falta la migración 002)
+  async acceso() {
+    const { data } = await sb.auth.getUser();
+    const { data: admin, error } = await sb.rpc("soy_admin");
+    return { email: data.user?.email || "", admin: error ? null : !!admin };
+  },
   async subirFoto(file) {
     const path = Date.now() + "-" + file.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-");
     must(await sb.storage.from("fotos").upload(path, file, { contentType: file.type }));
@@ -702,7 +780,7 @@ function drawDone(s) {
         <a class="btn wa" href="https://wa.me/${STUDIO.whatsapp}?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">Enviar por WhatsApp</a>
         <button class="btn ghost" data-copy>Copiar mensaje</button>
       </div>
-      <p class="hint">Tu reserva ya quedó guardada en la agenda de María. Envíale el aviso por WhatsApp para que lo vea al tiro.</p>
+      <p class="hint">${STUDIO.avisosAutomaticos ? "Te enviamos la confirmación a tu correo y María ya recibió el aviso. Si quieres, también puedes escribirle por WhatsApp." : "Tu reserva ya quedó guardada en la agenda de María. Envíale el aviso por WhatsApp para que lo vea al tiro."}</p>
     </div>
   </aside></div>`;
 }
@@ -726,7 +804,7 @@ async function submitBooking(form) {
 }
 
 /* ---------- panel de María ---------- */
-let tab = "resumen", filtro = { q: "", estado: "todas" }, confirmDel = null;
+let tab = "calendario", filtro = { q: "", estado: "todas" }, confirmDel = null;
 
 async function stats() {
   const [servicios, reservas, clientas] = await Promise.all([db.listarServicios(), db.listarReservas(), db.listarClientas()]);
@@ -766,14 +844,19 @@ function renderLogin(msg = "") {
 
 async function renderPanel() {
   if (!(await db.sesion())) return renderLogin();
+  const acc = await db.acceso();
+  if (acc.admin === false) return renderSinPermiso(acc.email);
   let st;
   try { st = await stats(); } catch (err) { return renderLogin("No se pudieron cargar los datos: " + err.message); }
+  ultimoSt = st;
+  escucharCambios();
   const svcName = id => (st.servicios.find(s => s.id === id) || { nombre: "Servicio eliminado" }).nombre;
   const cli = id => st.clientas.find(c => c.id === id) || { nombre: "?", apellido: "", correo: "", telefono: "" };
   const estadoPill = r => r.estado === "completada" ? `<span class="pill ok">Completada</span>` : r.estado === "cancelada" ? `<span class="pill bad">Cancelada</span>` : `<span class="pill warn">Confirmada</span>`;
   const precioCell = r => r.gratis ? `<span class="pill gift">Gratis</span>` : `<span class="num">${clp(r.precio)}</span>`;
 
   let body = "";
+  if (tab === "calendario") body = calendario(st);
   if (tab === "resumen") {
     const max = Math.max(1, ...st.porServicio.map(x => x.v));
     const best = st.porServicio[0], worst = st.porServicio[st.porServicio.length - 1];
@@ -817,7 +900,7 @@ async function renderPanel() {
       <thead><tr><th>Fecha</th><th>Bloque</th><th>Clienta</th><th>Servicio</th><th class="r">Precio</th><th>Estado</th><th class="r">Acciones</th></tr></thead>
       <tbody>${rows.slice(0, 120).map(r => { const c = cli(r.clientaId); return `<tr>
         <td class="num nowrap" data-label="Fecha">${fechaCorta(r.fecha)}</td><td class="num nowrap" data-label="Bloque">${bloque(r.hora)}</td>
-        <td class="who" data-label="Clienta"><div><b>${esc(c.nombre)} ${esc(c.apellido)}</b><span class="num">${esc(c.telefono)}</span></div></td>
+        <td class="who" data-label="Clienta"><div><button class="linkish" data-res="${r.id}">${esc(c.nombre)} ${esc(c.apellido)}</button><span class="num">${esc(c.telefono)}</span></div></td>
         <td data-label="Servicio">${esc(svcName(r.servicioId))}</td><td class="r" data-label="Precio">${precioCell(r)}</td><td data-label="Estado">${estadoPill(r)}</td>
         <td class="acts-cell"><div class="row-actions">${r.estado === "confirmada" ? `<button class="btn sm" data-estado="completada" data-id="${r.id}">Completar</button><button class="btn sm ghost" data-estado="cancelada" data-id="${r.id}">Cancelar</button>` : ""}</div></td>
       </tr>`; }).join("") || `<tr><td colspan="7" class="empty">No hay reservas con ese filtro.</td></tr>`}</tbody>
@@ -873,11 +956,129 @@ async function renderPanel() {
     <nav class="nav"><a href="#inicio">Ver la web</a></nav>
   </div></header>
   <main class="panel"><div class="wrap">
-    <div class="p-head"><div><span class="eyebrow">Hola, María</span><h1>Tu studio en números</h1></div>
+    <div class="p-head"><div><span class="eyebrow">Hola, María</span><h1>${tab === "calendario" ? "Tu semana" : "Tu studio en números"}</h1>
+      <p class="p-sub">${st.proximas.length ? `<span class="pill warn">${st.proximas.length} hora${st.proximas.length > 1 ? "s" : ""} pendiente${st.proximas.length > 1 ? "s" : ""}</span> ` : ""}${DEMO ? "Modo demo: datos de ejemplo, sin conexión a Supabase." : `Conectada como ${esc(acc.email)}.`}${acc.admin === null ? " Falta correr <b>supabase/migraciones/002_calendario_y_avisos.sql</b>." : ""}</p></div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${DEMO ? `<span class="pill">Datos de ejemplo</span><button class="btn sm ghost" id="reset">Restablecer ejemplo</button>` : `<button class="btn sm ghost" id="logout">Cerrar sesión</button>`}</div></div>
-    <div class="tabs" role="tablist">${[["resumen","Resumen"],["reservas","Reservas e historial"],["servicios","Servicios"],["clientas","Clientas y fidelidad"]].map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${tab === k}">${l}</button>`).join("")}</div>
+    <div class="tabs" role="tablist">${[["calendario","Calendario"],["resumen","Resumen"],["reservas","Reservas e historial"],["servicios","Servicios"],["clientas","Clientas y fidelidad"]].map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${tab === k}">${l}</button>`).join("")}</div>
     ${body}
   </div></main>`;
+  return st;
+}
+
+function renderSinPermiso(email) {
+  app.innerHTML = `
+  <header class="top"><div class="wrap"><a class="brand" href="#inicio">${logo()}<span><b>MONSE</b><small>PANEL DE MARÍA</small></span></a><nav class="nav"><a href="#inicio">Ver la web</a></nav></div></header>
+  <main class="panel"><div class="wrap" style="max-width:620px">
+    <div class="card" style="display:flex;flex-direction:column;gap:14px;margin-top:20px">
+      <span class="eyebrow">Sin permiso</span>
+      <h1 style="font-family:var(--display);font-size:34px;color:var(--accent)">Este correo no está autorizado</h1>
+      <p>Entraste como <b>${esc(email)}</b>, pero ese correo no está en la lista de administradoras, así que la base de datos no muestra reservas ni clientas.</p>
+      <p>Para autorizarlo, entra a Supabase, abre <b>SQL Editor</b> y corre:</p>
+      <pre class="msgbox" style="user-select:all">insert into public.admins (email) values ('${esc(email)}');</pre>
+      <button class="btn ghost" id="logout">Cerrar sesión</button>
+    </div>
+  </div></main>`;
+}
+
+/* ---------- calendario semanal ---------- */
+let semana = lunesDe(new Date()), diaMovil = null, ultimoSt = null, confirmCancel = null, escuchando = false;
+function lunesDe(d) { const x = startOfDay(d); return addDays(x, -((x.getDay() + 6) % 7)); }
+const pad2 = n => String(n).padStart(2, "0");
+const pillEstado = r => r.estado === "completada" ? `<span class="pill ok">Completada</span>` : r.estado === "cancelada" ? `<span class="pill bad">Cancelada</span>` : `<span class="pill warn">Confirmada</span>`;
+const telWa = t => { const d = String(t || "").replace(/\D/g, ""); return d.length === 8 ? "569" + d : d.length === 9 && d[0] === "9" ? "56" + d : d; };
+
+function calendario(st) {
+  const hoy = ymd(new Date());
+  const dias = STUDIO.diasAbiertos.map(n => ymd(addDays(semana, n - 1)));
+  if (!dias.includes(diaMovil)) diaMovil = dias.includes(hoy) ? hoy : dias[0];
+  const activas = st.reservas.filter(r => r.estado !== "cancelada" && dias.includes(r.fecha));
+  const cli = id => st.clientas.find(c => c.id === id) || { nombre: "Clienta", apellido: "" };
+  const svc = id => (st.servicios.find(s => s.id === id) || { nombre: "Servicio" }).nombre;
+  const ini = parseYmd(dias[0]), fin = parseYmd(dias[dias.length - 1]);
+  const rango = ini.getMonth() === fin.getMonth() ? `${ini.getDate()} – ${fin.getDate()} de ${MESES[fin.getMonth()]}` : `${ini.getDate()} ${MESES[ini.getMonth()].slice(0, 3)} – ${fin.getDate()} ${MESES[fin.getMonth()].slice(0, 3)}`;
+  const pend = activas.filter(r => r.estado === "confirmada").length;
+  const celda = (f, h, col) => {
+    const r = activas.find(x => x.fecha === f && x.hora === h);
+    if (r) {
+      const c = cli(r.clientaId);
+      return `<button class="cal-res est-${r.estado}" data-col="${col}" data-res="${r.id}" draggable="${r.estado === "confirmada" && f >= hoy}" aria-label="${esc(c.nombre)} ${esc(c.apellido)}, ${esc(svc(r.servicioId))}, ${bloque(h)}">
+        <b>${esc(c.nombre)} ${esc(c.apellido)}</b><span>${esc(svc(r.servicioId))}</span><em>${r.gratis ? "Gratis" : r.estado === "completada" ? "Completada" : clp(r.precio)}</em></button>`;
+    }
+    const past = f < hoy;
+    return `<div class="cal-cell ${past ? "past" : ""}" data-col="${col}" ${past ? "" : `data-drop="${f}|${h}"`}>${past ? "" : "Libre"}</div>`;
+  };
+  return `
+  <div class="cal-bar">
+    <div class="cal-nav"><button class="btn sm ghost" data-semana="-1" aria-label="Semana anterior">‹</button><h3 class="num">${rango}</h3><button class="btn sm ghost" data-semana="1" aria-label="Semana siguiente">›</button>${dias.includes(hoy) ? "" : `<button class="btn sm ghost" data-semana="0">Hoy</button>`}</div>
+    <p class="hint">${pend ? `${pend} hora${pend > 1 ? "s" : ""} por atender esta semana.` : "No hay horas por atender esta semana."} Toca un bloque para ver el detalle<span class="hide-sm"> o arrástralo a otro día y hora</span>.</p>
+  </div>
+  <div class="cal-days">${dias.map(f => { const d = parseYmd(f), n = activas.filter(r => r.fecha === f).length; return `<button class="cal-day ${f === hoy ? "today" : ""}" data-dia="${f}" aria-pressed="${f === diaMovil}"><small>${DIAS[d.getDay()]}</small><b class="num">${d.getDate()}</b><i>${n || ""}</i></button>`; }).join("")}</div>
+  <div class="cal" data-show="${dias.indexOf(diaMovil)}">
+    <div class="cal-corner"></div>
+    ${dias.map((f, i) => { const d = parseYmd(f); return `<div class="cal-head ${f === hoy ? "today" : ""}" data-col="${i}"><small>${DIAS[d.getDay()]}</small><b class="num">${d.getDate()}</b></div>`; }).join("")}
+    ${STUDIO.bloques.map(h => `<div class="cal-hour num">${pad2(h)}:00<small>${pad2(h + STUDIO.duracionBloque)}:00</small></div>` + dias.map((f, i) => celda(f, h, i)).join("")).join("")}
+  </div>
+  <div class="cal-legend"><span><i class="lg est-confirmada"></i>Confirmada</span><span><i class="lg est-completada"></i>Completada</span><span><i class="lg libre"></i>Libre</span></div>`;
+}
+
+function detalleReserva(st, id, aviso = "") {
+  const r = st.reservas.find(x => x.id === id); if (!r) return;
+  const c = st.clientas.find(x => x.id === r.clientaId) || { nombre: "Clienta", apellido: "", correo: "", telefono: "" };
+  const s = st.servicios.find(x => x.id === r.servicioId) || { nombre: "Servicio eliminado" };
+  const visitas = st.reservas.filter(x => x.clientaId === r.clientaId && x.estado !== "cancelada").length;
+  const sellos = visitas % STUDIO.fidelidad;
+  const hoy = ymd(new Date()), editable = r.estado === "confirmada";
+  const msg = `Hola ${c.nombre}, te escribe María de ${STUDIO.nombre}. Tu hora de ${s.nombre} es el ${fechaLarga(r.fecha)}, de ${bloque(r.hora)}, en ${STUDIO.direccion}.`;
+  layer.innerHTML = `<div class="scrim center" data-close><div class="modal" role="dialog" aria-modal="true" aria-labelledby="det-t">
+    <div class="dr-head"><div><span class="eyebrow">${fechaLarga(r.fecha)} · ${bloque(r.hora)}</span><h2 id="det-t">${esc(c.nombre)} ${esc(c.apellido)}</h2></div><button class="x" data-close aria-label="Cerrar">×</button></div>
+    ${aviso ? `<p class="loyal-note free">${esc(aviso)}</p>` : ""}
+    <dl class="det">
+      <dt>Servicio</dt><dd>${esc(s.nombre)}</dd>
+      <dt>Precio</dt><dd>${r.gratis ? `<span class="pill gift">Gratis por fidelidad</span>` : `<span class="num">${clp(r.precio)}</span>`}</dd>
+      <dt>Estado</dt><dd>${pillEstado(r)}</dd>
+      <dt>Teléfono</dt><dd class="num">${esc(c.telefono)}</dd>
+      <dt>Correo</dt><dd>${esc(c.correo)}</dd>
+      <dt>Servicios con ella</dt><dd class="num">${visitas} · ${sellos === STUDIO.fidelidad - 1 ? "la próxima es gratis" : sellos + " de 5 sellos"}</dd>
+      <dt>Reservó el</dt><dd class="num">${r.creada ? fechaCorta(r.creada) : "—"}</dd>
+    </dl>
+    <div class="det-acts">
+      <a class="btn sm wa" href="https://wa.me/${telWa(c.telefono)}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">WhatsApp a la clienta</a>
+      ${editable && r.fecha <= hoy ? `<button class="btn sm" data-estado="completada" data-id="${r.id}">Marcar completada</button>` : ""}
+    </div>
+    ${editable ? `
+    <form class="move" id="move-form" data-id="${r.id}" novalidate>
+      <span class="lbl">Mover a otro día u hora</span>
+      <div class="move-row">
+        <input type="date" id="mv-fecha" value="${r.fecha}" min="${hoy}" aria-label="Nuevo día">
+        <select id="mv-hora" aria-label="Nuevo bloque">${STUDIO.bloques.map(h => `<option value="${h}" ${h === r.hora ? "selected" : ""}>${bloque(h)}</option>`).join("")}</select>
+        <button class="btn sm" type="submit">Mover</button>
+      </div>
+    </form>
+    <div class="det-danger">${confirmCancel === r.id
+      ? `<span>¿Cancelar la hora y liberar el bloque?</span><button class="btn sm danger" data-estado="cancelada" data-id="${r.id}">Sí, cancelar</button><button class="btn sm ghost" data-nocancel="${r.id}">No</button>`
+      : `<button class="btn sm ghost" data-askcancel="${r.id}">Cancelar y liberar el bloque</button>`}</div>` : ""}
+  </div></div>`;
+}
+
+async function moverReserva(id, fecha, hora) {
+  if (!fecha) return toast("Elige un día.");
+  if (!STUDIO.diasAbiertos.includes(parseYmd(fecha).getDay())) return toast("Ese día el studio está cerrado.");
+  if (fecha < ymd(new Date())) return toast("No se puede mover a un día que ya pasó.");
+  try { await db.moverReserva(id, fecha, hora); } catch (err) { return toast(err.message); }
+  semana = lunesDe(parseYmd(fecha)); diaMovil = fecha;
+  const st = await renderPanel();
+  detalleReserva(st, id, `Movida al ${fechaLarga(fecha)}, ${bloque(hora)}.${STUDIO.avisosAutomaticos ? " Le enviamos un correo a la clienta." : " Avísale a la clienta por WhatsApp."}`);
+}
+
+// Avisa en vivo cuando entra o cambia una reserva (Supabase Realtime)
+function escucharCambios() {
+  if (DEMO || escuchando) return;
+  escuchando = true;
+  sb.channel("reservas-panel").on("postgres_changes", { event: "*", schema: "public", table: "reservas" }, p => {
+    if (location.hash !== "#panel") return;
+    if (p.eventType === "INSERT") toast("Nueva reserva recibida");
+    if (!layer.innerHTML) renderPanel();
+  }).subscribe();
 }
 
 /* ---------- router y eventos ---------- */
@@ -897,7 +1098,12 @@ document.addEventListener("click", async e => {
   const slot = t.closest("[data-slot]"); if (slot && !slot.disabled) { bk.vals = Object.fromEntries(new FormData(document.getElementById("bk-form"))); bk.hora = +slot.dataset.slot; const y = layer.querySelector(".drawer").scrollTop; await drawBooking(); layer.querySelector(".drawer").scrollTop = y; return; }
   if (t.matches("[data-copy]")) { const txt = document.getElementById("wa-msg").textContent; try { await navigator.clipboard.writeText(txt); toast("Mensaje copiado"); } catch (_) { const r = document.createRange(); r.selectNodeContents(document.getElementById("wa-msg")); getSelection().removeAllRanges(); getSelection().addRange(r); toast("Mensaje seleccionado: cópialo con Ctrl+C"); } return; }
   const tb = t.closest("[data-tab]"); if (tb) { tab = tb.dataset.tab; filtro.q = ""; confirmDel = null; return renderPanel(); }
-  if (t.dataset.estado) { await db.cambiarEstado(t.dataset.id, t.dataset.estado); toast(t.dataset.estado === "completada" ? "Marcada como completada" : "Reserva cancelada"); return renderPanel(); }
+  if (t.dataset.estado) { await db.cambiarEstado(t.dataset.id, t.dataset.estado); confirmCancel = null; if (t.closest(".modal")) closeBooking(); toast(t.dataset.estado === "completada" ? "Marcada como completada" : "Hora cancelada, el bloque quedó libre"); return renderPanel(); }
+  const sem = t.closest("[data-semana]"); if (sem) { const k = +sem.dataset.semana; semana = k ? addDays(semana, 7 * k) : lunesDe(new Date()); diaMovil = null; return renderPanel(); }
+  const dia = t.closest("[data-dia]"); if (dia) { diaMovil = dia.dataset.dia; return renderPanel(); }
+  const rs = t.closest("[data-res]"); if (rs && ultimoSt) { confirmCancel = null; return detalleReserva(ultimoSt, rs.dataset.res); }
+  if (t.dataset.askcancel) { confirmCancel = t.dataset.askcancel; return detalleReserva(ultimoSt, confirmCancel); }
+  if (t.dataset.nocancel) { const id = t.dataset.nocancel; confirmCancel = null; return detalleReserva(ultimoSt, id); }
   if (t.dataset.toggle) { const s = (await db.listarServicios()).find(x => x.id === t.dataset.toggle); await db.actualizarServicio(s.id, { activo: !s.activo }); toast(s.activo ? "Quitado de la web" : "Visible en la web"); return renderPanel(); }
   if (t.dataset.askdel) { confirmDel = t.dataset.askdel; return renderPanel(); }
   if (t.dataset.del) { await db.eliminarServicio(t.dataset.del); confirmDel = null; toast("Servicio eliminado"); return renderPanel(); }
@@ -923,6 +1129,7 @@ document.addEventListener("input", e => {
 document.addEventListener("submit", async e => {
   e.preventDefault();
   if (e.target.id === "bk-form") return submitBooking(e.target);
+  if (e.target.id === "move-form") return moverReserva(e.target.dataset.id, document.getElementById("mv-fecha").value, +document.getElementById("mv-hora").value);
   if (e.target.id === "login-form") {
     const v = Object.fromEntries(new FormData(e.target).entries());
     try { await db.entrar(v.email.trim(), v.password); renderPanel(); }
@@ -938,8 +1145,13 @@ document.addEventListener("submit", async e => {
     toast("Servicio agregado"); renderPanel();
   }
 });
+// arrastrar y soltar bloques del calendario (escritorio)
+document.addEventListener("dragstart", e => { const r = e.target.closest?.("[data-res]"); if (!r) return; e.dataTransfer.setData("text/plain", r.dataset.res); e.dataTransfer.effectAllowed = "move"; r.classList.add("dragging"); });
+document.addEventListener("dragend", () => document.querySelectorAll(".dragging, .drop-ok").forEach(x => x.classList.remove("dragging", "drop-ok")));
+document.addEventListener("dragover", e => { const c = e.target.closest?.("[data-drop]"); if (!c) return; e.preventDefault(); document.querySelectorAll(".drop-ok").forEach(x => x !== c && x.classList.remove("drop-ok")); c.classList.add("drop-ok"); });
+document.addEventListener("drop", e => { const c = e.target.closest?.("[data-drop]"); if (!c) return; e.preventDefault(); const id = e.dataTransfer.getData("text/plain"); const [f, h] = c.dataset.drop.split("|"); if (id) moverReserva(id, f, +h); });
 window.addEventListener("unhandledrejection", e => { toast("No se pudo completar: " + (e.reason?.message || "revisa tu conexión")); });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && bk) closeBooking(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && layer.innerHTML) closeBooking(); });
 
 if (DEMO) load();
 route();

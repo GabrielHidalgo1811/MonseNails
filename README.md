@@ -7,6 +7,8 @@
 | `index.html` | La web completa: la página pública, la reserva y el panel de María (`/#panel`). |
 | `fotos/` | Las fotos de referencia de los servicios y la foto de María. |
 | `supabase/schema.sql` | La base de datos: tablas, seguridad, reglas de reserva y fidelidad, y fotos. |
+| `supabase/migraciones/002_calendario_y_avisos.sql` | Actualización para quien ya corrió `schema.sql`: calendario en vivo y revisión de permisos. |
+| `supabase/functions/notificar-reserva/` | Avisos automáticos: correo a la clienta y WhatsApp a María. |
 | `build.mjs` | Arma la carpeta `dist/` para publicar y pone ahí las llaves de Supabase. |
 | `.env.example` | Modelo del archivo `.env` donde van las llaves. El `.env` real no se sube a GitHub. |
 | `netlify.toml` / `vercel.json` | Configuración para publicar en Netlify o Vercel. |
@@ -47,7 +49,7 @@ Sin llaves, la web funciona en **modo demo** con datos de ejemplo.
 ### 5. Usarla
 - Las clientas entran al link, eligen un servicio, un día y un bloque de 2 horas, y dejan nombre, apellido, correo y teléfono.
 - La reserva queda guardada en Supabase, y aparece un botón para mandarle el aviso a María por WhatsApp (+56 9 2610 8745).
-- María entra a `tu-link/#panel` con su correo y contraseña. Ahí ve los ingresos, el servicio que más y menos plata deja, las reservas, las clientas con sus sellos y los servicios. También puede marcar las citas como completadas o canceladas, cambiar precios y fotos, y agregar o quitar servicios.
+- María entra a `tu-link/#panel` con su correo y contraseña. Lo primero que ve es **su calendario de la semana**. Si toca un bloque, ve todos los datos de la clienta. Puede arrastrar el bloque a otro día y hora (en el celular lo hace desde "Mover a otro día u hora") o cancelarlo para liberarlo. En las otras pestañas ve los ingresos, el servicio que más y menos plata deja, las reservas, las clientas con sus sellos y los servicios. También puede marcar las citas como completadas o canceladas, cambiar precios y fotos, y agregar o quitar servicios.
 
 ## Reglas que ya están en la base de datos
 - Hay bloques a las 10, 12, 14, 16 y 18 h, de lunes a sábado, para reservar desde mañana hasta 60 días adelante. Para cambiarlos, edita `STUDIO.bloques` en `index.html` y los números `(10, 12, 14, 16, 18)` en `schema.sql`.
@@ -55,5 +57,36 @@ Sin llaves, la web funciona en **modo demo** con datos de ejemplo.
 - Cada clienta se reconoce por su correo o su teléfono. Su 6.º servicio (y el 12.º, el 18.º…) queda marcado como **gratis** y no suma a los ingresos.
 - Las visitas no ven datos de otras clientas. Solo pueden ver los servicios activos y qué bloques están ocupados.
 
-## Siguiente paso opcional
-Para que el aviso le llegue a María por WhatsApp de forma automática, sin que la clienta toque el botón, hace falta un servicio de WhatsApp (por ejemplo WhatsApp Cloud API o Twilio) conectado con una Edge Function de Supabase.
+## Si una reserva no aparece en el panel
+1. **¿Ya corriste la actualización 002?** Si ya tenías la base de datos creada, pega y corre `supabase/migraciones/002_calendario_y_avisos.sql` en SQL Editor. Al final muestra qué correos pueden entrar al panel.
+2. **¿El correo de María está autorizado?** El panel ahora lo revisa. Si dice *"Este correo no está autorizado"*, te muestra la línea exacta que hay que correr en SQL Editor. Este suele ser el problema: el `schema.sql` traía `maria@ejemplo.cl` como ejemplo.
+3. **¿La web está en modo demo?** Si arriba dice "Modo demo", el hosting no tiene las variables `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Agrégalas y vuelve a publicar. En modo demo, las reservas solo quedan en el navegador de quien reservó.
+
+## Avisos automáticos (correo a la clienta y WhatsApp a María)
+Cuando alguien reserva, la clienta recibe un correo de confirmación y a María le llega un WhatsApp con los datos. Si María mueve o cancela una hora, la clienta también recibe un correo. Las dos herramientas son gratis.
+
+### a) Correo con Brevo
+1. Crea una cuenta en [brevo.com](https://www.brevo.com). El plan gratis permite 300 correos al día.
+2. En **Senders, Domains & Dedicated IPs → Senders**, agrega el correo que va a aparecer como remitente (por ejemplo el Gmail del studio) y confírmalo desde ese correo.
+3. En **SMTP & API → API Keys**, crea una llave y cópiala.
+
+> ¿Tienen dominio propio (por ejemplo monsenails.cl)? Pueden usar [Resend](https://resend.com) en vez de Brevo. En ese caso usa `RESEND_API_KEY` en lugar de `BREVO_API_KEY`.
+
+### b) WhatsApp a María con CallMeBot
+1. Desde el WhatsApp de María, sigue las instrucciones de [callmebot.com → WhatsApp API](https://www.callmebot.com/blog/free-api-whatsapp-messages/). Hay que agregar el número de CallMeBot a los contactos y mandarle el mensaje de activación.
+2. CallMeBot le responde a María con su `apikey`.
+
+> CallMeBot sirve para mandarse avisos a uno mismo, que es justo este caso. Si más adelante quieren algo más formal, la alternativa es Twilio o WhatsApp Cloud API (de pago).
+
+### c) Crear la función en Supabase
+1. Ve a **Edge Functions → Deploy a new function → Via Editor**. Ponle de nombre `notificar-reserva`, pega el contenido de `supabase/functions/notificar-reserva/index.ts` y toca **Deploy**.
+2. En **Edge Functions → Secrets**, agrega:
+   - `BREVO_API_KEY`: la llave de Brevo
+   - `EMAIL_FROM`: el remitente que confirmaste en Brevo
+   - `CALLMEBOT_APIKEY`: la apikey que recibió María
+3. En **Database → Webhooks → Create a new hook**:
+   - Nombre: `avisos-reservas`. Tabla: `reservas`. Eventos: **Insert** y **Update**.
+   - Tipo: **Supabase Edge Functions**, función `notificar-reserva`, método POST.
+   - Deja activada la opción de agregar el header de autorización (Authorization con la service key).
+4. En `index.html`, cambia `avisosAutomaticos: false` por `true`. Así la pantalla de confirmación le dice a la clienta que le llegó un correo.
+5. Haz una reserva de prueba. Si algo falla, **Edge Functions → notificar-reserva → Logs** muestra el error exacto (por ejemplo, una llave mal copiada).
