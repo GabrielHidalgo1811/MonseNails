@@ -10,7 +10,9 @@
 //   RESEND_API_KEY     alternativa a Brevo (necesita un dominio verificado)
 //   EMAIL_FROM         remitente verificado, por ejemplo monsenails.studio@gmail.com
 //   CALLMEBOT_APIKEY   WhatsApp a María con CallMeBot (gratis)
-//   MARIA_WHATSAPP     opcional, por defecto +56926108745
+//   AVISO_CORREO       opcional: correo del studio que también recibe cada reserva nueva
+//   MARIA_WHATSAPP     a quién le llega el WhatsApp (debe ser el mismo número que activó CallMeBot).
+//                      Por defecto +56987380493 (Gabo, para probar); para María: +56926108745
 // SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY ya vienen incluidas en Supabase.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -57,6 +59,10 @@ Deno.serve(async (req) => {
   if (type === "INSERT") {
     tareas.push(enviarCorreo(c, `Tu hora en ${STUDIO.nombre} está confirmada`, plantilla(c, "¡Tu hora está reservada!", record, s,
       record.gratis ? "Este es tu sexto servicio, así que va por cuenta de la casa." : "")));
+    if (env("AVISO_CORREO")) {
+      tareas.push(enviarCorreo({ nombre: "María", apellido: "", correo: env("AVISO_CORREO"), telefono: "" }, `Nueva reserva: ${c.nombre} ${c.apellido}`,
+        plantilla({ ...c, nombre: "María" }, `${c.nombre} ${c.apellido} reservó`, record, s, `Contacto: ${c.telefono} · ${c.correo}`)));
+    }
     tareas.push(whatsappMaria(
       `Nueva reserva en ${STUDIO.nombre}\n` +
       `• ${s} (${record.gratis ? "GRATIS por fidelidad" : clp(record.precio)})\n` +
@@ -102,7 +108,7 @@ async function enviarCorreo(c: Clienta, asunto: string, html: string) {
 
 async function whatsappMaria(texto: string) {
   if (!env("CALLMEBOT_APIKEY")) throw new Error("Falta CALLMEBOT_APIKEY");
-  const phone = env("MARIA_WHATSAPP") || "+56926108745";
+  const phone = "+" + (env("MARIA_WHATSAPP") || "+56987380493").replace(/\D/g, "").replace(/^(?=9\d{8}$)/, "56");
   const url = `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(texto)}&apikey=${encodeURIComponent(env("CALLMEBOT_APIKEY"))}`;
   const r = await fetch(url);
   const body = await r.text();

@@ -86,9 +86,11 @@ Cuando alguien reserva, la clienta recibe un correo de confirmación y a María 
    - `BREVO_API_KEY`: la llave de Brevo
    - `EMAIL_FROM`: el remitente que confirmaste en Brevo
    - `CALLMEBOT_APIKEY`: la apikey que recibió María
+   - `MARIA_WHATSAPP`: el número que activó CallMeBot, por ejemplo `+56926108745`. CallMeBot solo le escribe al número dueño de la apikey. Mientras se prueba, el aviso va por defecto al teléfono de Gabo (`+56987380493`), así que Gabo debe activar CallMeBot desde su WhatsApp.
+   - `AVISO_CORREO` (opcional): un correo del studio que también recibe cada reserva nueva.
 3. En **Database → Webhooks → Create a new hook**:
    - Nombre: `avisos-reservas`. Tabla: `reservas`. Eventos: **Insert** y **Update**.
    - Tipo: **Supabase Edge Functions**, función `notificar-reserva`, método POST.
    - Deja activada la opción de agregar el header de autorización (Authorization con la service key).
-4. En `index.html`, cambia `avisosAutomaticos: false` por `true`. Así la pantalla de confirmación le dice a la clienta que le llegó un correo.
+4. En `index.html`, cambia `avisosAutomaticos: false` por `true`. Cuando terminen las pruebas, cambia también `avisoWhatsapp` al número de María (`56926108745`). Así la pantalla de confirmación le dice a la clienta que le llegó un correo.
 5. Haz una reserva de prueba. Si algo falla, **Edge Functions → notificar-reserva → Logs** muestra el error exacto (por ejemplo, una llave mal copiada).
