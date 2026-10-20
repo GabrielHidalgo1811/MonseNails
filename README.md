@@ -8,6 +8,7 @@
 | `fotos/` | Las fotos de referencia de los servicios y la foto de María. |
 | `supabase/schema.sql` | La base de datos: tablas, seguridad, reglas de reserva y fidelidad, y fotos. |
 | `supabase/migraciones/002_calendario_y_avisos.sql` | Actualización para quien ya corrió `schema.sql`: calendario en vivo y revisión de permisos. |
+| `supabase/migraciones/004_avisos_sin_webhook.sql` | Conecta las reservas con la función de avisos desde SQL Editor, si la pantalla de Webhooks da error. |
 | `supabase/migraciones/003_jornada_laboral.sql` | Actualización para quien ya corrió `schema.sql`: jornada laboral editable desde el panel. |
 | `supabase/functions/notificar-reserva/` | Avisos automáticos: correo a la clienta y Telegram a María. |
 | `build.mjs` | Arma la carpeta `dist/` para publicar y pone ahí las llaves de Supabase. |
@@ -91,7 +92,7 @@ WhatsApp no tiene una forma gratis de mandar avisos automáticos, así que el av
    - `TELEGRAM_BOT_TOKEN`: el token que te dio @BotFather
    - `TELEGRAM_CHAT_ID`: tu Id de @userinfobot
    - `AVISO_CORREO` (opcional): un correo del studio que también recibe cada reserva nueva.
-3. En **Database → Webhooks → Create a new hook**:
+3. Conecta las reservas con la función. Lo más simple: abre `supabase/migraciones/004_avisos_sin_webhook.sql`, pega tu clave service_role donde dice 👉 y córrelo en SQL Editor. (O, si la pantalla funciona en tu proyecto, en **Integrations → Database Webhooks → Create a new hook**:)
    - Nombre: `avisos-reservas`. Tabla: `reservas`. Eventos: **Insert** y **Update**.
    - Tipo: **Supabase Edge Functions**, función `notificar-reserva`, método POST.
    - Deja activada la opción de agregar el header de autorización (Authorization con la service key).
