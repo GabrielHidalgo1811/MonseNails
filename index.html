@@ -410,7 +410,7 @@ tr:last-child td{border-bottom:0}
 .hero .wrap{position:relative;display:flex;align-items:center;min-height:min(80vh,660px);padding-block:72px}
 .h-copy{max-width:560px}
 .hero .eyebrow{color:#8E5A76}
-.hero h1{font-family:var(--display);font-size:clamp(44px,6.2vw,80px);color:#4B1E3F;letter-spacing:-.01em;margin-top:14px}
+.hero h1{font-family:var(--display);font-size:clamp(44px,6.2vw,80px);color:#4B1E3F;letter-spacing:-.01em}
 .hero h1 em{font-style:italic;color:#A8738F}
 .hero .lead{font-family:var(--display);font-style:italic;font-size:clamp(24px,2.4vw,30px);color:#5A2347;margin-top:18px;line-height:1.2}
 .hero .lead2{color:#6E4A62;font-size:17px;margin-top:10px;max-width:42ch}
@@ -825,7 +825,6 @@ async function renderPublic() {
   try { servicios = await db.listarServicios({ soloActivos: true }); }
   catch (err) { toast("No se pudieron cargar los servicios. Revisa la configuración de Supabase."); }
   app.innerHTML = `
-  ${DEMO ? `<div class="demo-bar"><div class="wrap">Vista de demostración con datos de ejemplo · <a href="#panel">Ver panel de María</a></div></div>` : ""}
   <header class="top"><div class="wrap">
     <a class="brand" href="#inicio">${logo()}<span><b>MONSE</b><small>NAILS STUDIO</small></span></a>
     <nav class="nav">
@@ -838,7 +837,6 @@ async function renderPublic() {
 
   <section class="hero"><div class="wrap">
     <div class="h-copy">
-      <span class="eyebrow">Studio de uñas · por ${STUDIO.duena}</span>
       <h1>Uñas que se ven <em>cuidadas</em> de cerca.</h1>
       <p class="lead">Tu momento, tus uñas, tu estilo.</p>
       <p class="lead2">Manicura rusa, rubber base, soft gel y polygel. Cada cita es un bloque de ${horasTexto(STUDIO.duracionBloque)} solo para ti.</p>
@@ -846,7 +844,6 @@ async function renderPublic() {
         <button class="btn" data-reservar="">Reservar una hora</button>
         <a class="btn ghost" href="#servicios">Ver servicios</a>
       </div>
-      <div class="gift">${ICON_GIFT}<p><b>De regalo:</b> hidratación con parafina en todas las manicuras.</p></div>
     </div>
     <div class="h-badge" aria-hidden="true">
       <svg viewBox="0 0 120 120"><defs><path id="hb-c" d="M60,60 m-49,0 a49,49 0 1,1 98,0 a49,49 0 1,1 -98,0"/></defs><text font-size="10.5" letter-spacing="3.2" fill="currentColor" font-family="Jost, sans-serif"><textPath href="#hb-c">TARJETA DE FIDELIDAD · MONSE NAILS ·</textPath></text></svg>
@@ -915,6 +912,7 @@ async function renderPublic() {
     </div>
   </div></section>
 
+  ${DEMO ? `<div class="demo-bar"><div class="wrap">Vista de demostración con datos de ejemplo · <a href="#panel">Ver panel de María</a></div></div>` : ""}
   <footer><div class="wrap"><span>© ${new Date().getFullYear()} ${STUDIO.nombre} · ${STUDIO.direccion}</span><a href="#panel">Panel de María</a></div></footer>
   <div class="fab"><button class="btn" data-reservar="">Reservar una hora</button><a class="btn ghost" href="https://wa.me/${STUDIO.whatsapp}" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">WhatsApp</a></div>`;
   if (servicios.length) { initBooking(servicios); await drawBooking(); }
