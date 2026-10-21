@@ -8,8 +8,9 @@
 | `fotos/` | Las fotos de referencia de los servicios y la foto de María. |
 | `supabase/schema.sql` | La base de datos: tablas, seguridad, reglas de reserva y fidelidad, y fotos. |
 | `supabase/migraciones/002_calendario_y_avisos.sql` | Actualización para quien ya corrió `schema.sql`: calendario en vivo y revisión de permisos. |
+| `supabase/migraciones/004_avisos_sin_webhook.sql` | Conecta las reservas con la función de avisos desde SQL Editor, si la pantalla de Webhooks da error. |
 | `supabase/migraciones/003_jornada_laboral.sql` | Actualización para quien ya corrió `schema.sql`: jornada laboral editable desde el panel. |
-| `supabase/functions/notificar-reserva/` | Avisos automáticos: correo a la clienta y WhatsApp a María. |
+| `supabase/functions/notificar-reserva/` | Avisos automáticos: correo a la clienta y Telegram a María. |
 | `build.mjs` | Arma la carpeta `dist/` para publicar y pone ahí las llaves de Supabase. |
 | `.env.example` | Modelo del archivo `.env` donde van las llaves. El `.env` real no se sube a GitHub. |
 | `netlify.toml` / `vercel.json` | Configuración para publicar en Netlify o Vercel. |
@@ -64,7 +65,7 @@ Sin llaves, la web funciona en **modo demo** con datos de ejemplo.
 2. **¿El correo de María está autorizado?** El panel ahora lo revisa. Si dice *"Este correo no está autorizado"*, te muestra la línea exacta que hay que correr en SQL Editor. Este suele ser el problema: el `schema.sql` traía `maria@ejemplo.cl` como ejemplo.
 3. **¿La web está en modo demo?** Si arriba dice "Modo demo", el hosting no tiene las variables `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Agrégalas y vuelve a publicar. En modo demo, las reservas solo quedan en el navegador de quien reservó.
 
-## Avisos automáticos (correo a la clienta y WhatsApp a María)
+## Avisos automáticos (correo a la clienta y Telegram a María)
 Cuando alguien reserva, la clienta recibe un correo de confirmación y a María le llega un WhatsApp con los datos. Si María mueve o cancela una hora, la clienta también recibe un correo. Las dos herramientas son gratis.
 
 ### a) Correo con Brevo
@@ -74,21 +75,26 @@ Cuando alguien reserva, la clienta recibe un correo de confirmación y a María 
 
 > ¿Tienen dominio propio (por ejemplo monsenails.cl)? Pueden usar [Resend](https://resend.com) en vez de Brevo. En ese caso usa `RESEND_API_KEY` en lugar de `BREVO_API_KEY`.
 
-### b) WhatsApp a María con CallMeBot
-1. Desde el WhatsApp de María, sigue las instrucciones de [callmebot.com → WhatsApp API](https://www.callmebot.com/blog/free-api-whatsapp-messages/). Hay que agregar el número de CallMeBot a los contactos y mandarle el mensaje de activación.
-2. CallMeBot le responde a María con su `apikey`.
+### b) Aviso a María por Telegram (gratis)
+WhatsApp no tiene una forma gratis de mandar avisos automáticos, así que el aviso instantáneo llega por Telegram.
+1. Instala Telegram en el celular. En el buscador escribe **@BotFather**, ábrelo y mándale `/newbot`.
+2. Te pide un nombre (por ejemplo `Reservas Monse`) y un usuario que termine en `bot` (por ejemplo `monse_reservas_bot`). Te responde con un **token** largo: ese es `TELEGRAM_BOT_TOKEN`.
+3. Busca tu bot nuevo por su usuario, ábrelo y toca **Iniciar** (o mándale "hola"). Sin esto el bot no te puede escribir.
+4. Busca **@userinfobot** y tócale **Iniciar**. Te responde con tu **Id** (un número): ese es `TELEGRAM_CHAT_ID`. Si quieren que les llegue a dos personas (por ejemplo a Gabo y a María), cada una repite los pasos 3 y 4 y se ponen los dos números separados por coma.
 
-> CallMeBot sirve para mandarse avisos a uno mismo, que es justo este caso. Si más adelante quieren algo más formal, la alternativa es Twilio o WhatsApp Cloud API (de pago).
+> El botón "Enviar por WhatsApp" de la pantalla de confirmación sigue funcionando: abre WhatsApp con el mensaje listo para mandárselo a María.
 
 ### c) Crear la función en Supabase
 1. Ve a **Edge Functions → Deploy a new function → Via Editor**. Ponle de nombre `notificar-reserva`, pega el contenido de `supabase/functions/notificar-reserva/index.ts` y toca **Deploy**.
 2. En **Edge Functions → Secrets**, agrega:
    - `BREVO_API_KEY`: la llave de Brevo
    - `EMAIL_FROM`: el remitente que confirmaste en Brevo
-   - `CALLMEBOT_APIKEY`: la apikey que recibió María
-3. En **Database → Webhooks → Create a new hook**:
+   - `TELEGRAM_BOT_TOKEN`: el token que te dio @BotFather
+   - `TELEGRAM_CHAT_ID`: tu Id de @userinfobot
+   - `AVISO_CORREO` (opcional): un correo del studio que también recibe cada reserva nueva.
+3. Conecta las reservas con la función. Lo más simple: abre `supabase/migraciones/004_avisos_sin_webhook.sql`, pega tu clave service_role donde dice 👉 y córrelo en SQL Editor. (O, si la pantalla funciona en tu proyecto, en **Integrations → Database Webhooks → Create a new hook**:)
    - Nombre: `avisos-reservas`. Tabla: `reservas`. Eventos: **Insert** y **Update**.
    - Tipo: **Supabase Edge Functions**, función `notificar-reserva`, método POST.
    - Deja activada la opción de agregar el header de autorización (Authorization con la service key).
-4. En `index.html`, cambia `avisosAutomaticos: false` por `true`. Así la pantalla de confirmación le dice a la clienta que le llegó un correo.
+4. En `index.html`, cambia `avisosAutomaticos: false` por `true`. Cuando terminen las pruebas, cambia también `avisoWhatsapp` al número de María (`56926108745`). Así la pantalla de confirmación le dice a la clienta que le llegó un correo.
 5. Haz una reserva de prueba. Si algo falla, **Edge Functions → notificar-reserva → Logs** muestra el error exacto (por ejemplo, una llave mal copiada).
