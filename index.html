@@ -247,11 +247,8 @@ tr:last-child td{border-bottom:0}
 .file-btn{position:relative}
 .svc-layout{grid-template-columns:1fr minmax(0,340px);align-items:start}
 .dr-foot{position:sticky;bottom:0;margin:16px -24px 0;padding:12px 24px max(14px, env(safe-area-inset-bottom, 0px));background:linear-gradient(to bottom, transparent, var(--bg) 18px)}
-.fab{display:none}
 @media (max-width:760px){
-  .fab{display:flex;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px max(16px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));background:color-mix(in srgb, var(--bg) 92%, transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
-  .fab .btn:first-child{flex:1}
-  footer{padding-bottom:calc(90px + env(safe-area-inset-bottom, 0px))}
+  footer{padding-bottom:calc(20px + env(safe-area-inset-bottom, 0px))}
   .top .nav .btn{display:none}
   section.block{padding-block:48px}
   .sec-head{margin-bottom:22px}
@@ -510,6 +507,41 @@ body[data-view="panel"] .tabs{border-bottom:0;background:var(--soft);padding:5px
 body[data-view="panel"] .tab{border:0;border-radius:999px;padding:8px 16px;color:var(--ink-2);display:inline-flex;align-items:center;gap:7px}
 body[data-view="panel"] .tab svg{width:16px;height:16px;opacity:.8}
 body[data-view="panel"] .tab[aria-selected="true"]{background:var(--surface);color:var(--accent);box-shadow:0 2px 10px -4px rgba(47,37,41,.25)}
+/* menú lateral del panel */
+body[data-view="panel"] .wrap{max-width:1320px}
+.p-layout{display:grid;grid-template-columns:232px minmax(0,1fr);gap:32px;align-items:start;transition:grid-template-columns .25s ease}
+.p-layout.corto{grid-template-columns:68px minmax(0,1fr)}
+.p-main{min-width:0}
+.side{position:sticky;top:88px;display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:10px}
+.side-head,.side-bg,.menu-btn{display:none}
+body[data-view="panel"] .side .tabs{flex-direction:column;background:none;padding:0;border-radius:0;width:auto;margin:0;gap:2px;overflow:visible}
+body[data-view="panel"] .side .tab{width:100%;border-radius:12px;padding:11px 12px;gap:11px;justify-content:flex-start;text-align:left;white-space:nowrap;overflow:hidden}
+body[data-view="panel"] .side .tab svg{width:19px;height:19px;flex:none}
+body[data-view="panel"] .side .tab:hover{background:var(--soft)}
+body[data-view="panel"] .side .tab[aria-selected="true"]{background:var(--t1);color:var(--t1i);box-shadow:none}
+body[data-view="panel"] .side .tab[aria-selected="true"] svg{opacity:1}
+.side-tog{display:flex;align-items:center;gap:11px;border:0;border-top:1px solid var(--line);background:none;color:var(--ink-3);padding:12px 12px 4px;margin-top:4px;cursor:pointer;font:inherit;font-size:13px;white-space:nowrap;overflow:hidden}
+.side-tog:hover{color:var(--ink)}
+.side svg{width:19px;height:19px;flex:none}
+.side-tog svg{transition:transform .25s ease}
+.corto .side .tab span,.corto .side-tog span{display:none}
+body[data-view="panel"] .corto .side .tab,.corto .side-tog{justify-content:center;padding-inline:0}
+.corto .side-tog svg{transform:scaleX(-1)}
+@media (max-width:860px){
+  .p-layout,.p-layout.corto{grid-template-columns:minmax(0,1fr);gap:0}
+  .menu-btn{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+  .menu-btn svg{width:20px;height:20px}
+  .side{position:fixed;z-index:45;top:0;bottom:0;left:0;width:min(290px,84vw);border-radius:0 22px 22px 0;border-width:0 1px 0 0;padding:max(18px,env(safe-area-inset-top,0px)) 14px 18px max(14px,env(safe-area-inset-left,0px));transform:translateX(-105%);transition:transform .25s ease;box-shadow:0 20px 60px -20px rgba(0,0,0,.45);overflow-y:auto}
+  .abierto .side{transform:none}
+  .side-bg{display:block;position:fixed;inset:0;z-index:44;background:rgba(20,14,18,.42);opacity:0;pointer-events:none;transition:opacity .25s ease}
+  .abierto .side-bg{opacity:1;pointer-events:auto}
+  .side-head{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 12px;font-family:var(--display);font-size:26px;color:var(--ink)}
+  .side-x{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;border:0;background:var(--soft);color:var(--ink);cursor:pointer}
+  .side-tog{display:none}
+  body[data-view="panel"] .corto .side .tab{justify-content:flex-start;padding-inline:12px}
+  .corto .side .tab span{display:inline}
+}
+@media (prefers-reduced-motion:reduce){.p-layout,.side,.side-bg,.side-tog svg{transition:none}}
 .kpi{position:relative}
 .kpi .ki{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
 .kpi .ki svg{width:20px;height:20px}
@@ -913,8 +945,7 @@ async function renderPublic() {
   </div></section>
 
   ${DEMO ? `<div class="demo-bar"><div class="wrap">Vista de demostración con datos de ejemplo · <a href="#panel">Ver panel de María</a></div></div>` : ""}
-  <footer><div class="wrap"><span>© ${new Date().getFullYear()} ${STUDIO.nombre} · ${STUDIO.direccion}</span><a href="#panel">Panel de María</a></div></footer>
-  <div class="fab"><button class="btn" data-reservar="">Reservar una hora</button><a class="btn ghost" href="https://wa.me/${STUDIO.whatsapp}" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">WhatsApp</a></div>`;
+  <footer><div class="wrap"><span>© ${new Date().getFullYear()} ${STUDIO.nombre} · ${STUDIO.direccion}</span><a href="#panel">Panel de María</a></div></footer>`;
   if (servicios.length) { initBooking(servicios); await drawBooking(); }
   else document.getElementById("booking").innerHTML = `<p class="hint">No hay servicios disponibles por ahora. Escríbele a María por WhatsApp.</p>`;
 }
@@ -1062,6 +1093,14 @@ async function submitBooking(form) {
 }
 
 /* ---------- panel de María ---------- */
+let menuCorto = (() => { try { return localStorage.getItem("monse.menu") === "corto"; } catch (e) { return false; } })(), menuAbierto = false;
+const esMovil = () => matchMedia("(max-width:860px)").matches;
+function menuPanel(abrir) {
+  const lay = document.querySelector(".p-layout"); if (!lay) return;
+  if (esMovil()) { menuAbierto = abrir ?? !menuAbierto; lay.classList.toggle("abierto", menuAbierto); document.querySelector("[data-menu].menu-btn")?.setAttribute("aria-expanded", menuAbierto); if (menuAbierto) lay.querySelector(".tab[aria-selected='true']")?.focus(); return; }
+  menuCorto = !menuCorto; lay.classList.toggle("corto", menuCorto);
+  try { localStorage.setItem("monse.menu", menuCorto ? "corto" : "largo"); } catch (e) {}
+}
 let tab = "calendario", filtro = { q: "", estado: "todas" }, confirmDel = null;
 
 async function stats() {
@@ -1109,6 +1148,9 @@ const PI = {
   jornada: `<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>`,
   plata: `<circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2.1 0 2.9 5.8 1.4 5.8 4.3 0 1.3-1.3 2.1-3 2.1-1.3 0-2.5-.6-3-1.6M12 6v1.8M12 16.3V18"/>`,
 };
+PI.menu = `<path d="M4 7h16M4 12h16M4 17h16"/>`;
+PI.plegar = `<path d="M4.5 4.5h15v15h-15zM9.5 4.5v15M15.5 10l-2 2 2 2"/>`;
+PI.cerrar = `<path d="M6 6l12 12M18 6L6 18"/>`;
 const pIcon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[k]}</svg>`;
 
 async function renderPanel() {
@@ -1223,14 +1265,21 @@ async function renderPanel() {
   app.innerHTML = `
   <header class="top"><div class="wrap">
     <a class="brand" href="#inicio">${logo()}<span><b>MONSE</b><small>PANEL DE MARÍA</small></span></a>
-    <nav class="nav"><a href="#inicio">Ver la web</a></nav>
+    <nav class="nav"><a href="#inicio">Ver la web</a><button class="menu-btn" data-menu aria-label="Abrir menú" aria-expanded="false">${pIcon("menu")}</button></nav>
   </div></header>
-  <main class="panel"><div class="wrap">
+  <main class="panel"><div class="wrap p-layout${menuCorto ? " corto" : ""}">
+    <div class="side-bg" data-menu-cerrar></div>
+    <aside class="side" aria-label="Secciones del panel">
+      <div class="side-head"><span>Menú</span><button class="side-x" data-menu-cerrar aria-label="Cerrar menú">${pIcon("cerrar")}</button></div>
+      <div class="tabs" role="tablist" aria-orientation="vertical">${[["calendario","Calendario"],["resumen","Resumen"],["reservas","Reservas e historial"],["servicios","Servicios"],["clientas","Clientas y fidelidad"],["jornada","Jornada laboral"]].map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${tab === k}" title="${l}">${pIcon(k)}<span>${l}</span></button>`).join("")}</div>
+      <button class="side-tog" data-menu aria-label="Plegar o desplegar el menú">${pIcon("plegar")}<span>Ocultar menú</span></button>
+    </aside>
+    <div class="p-main">
     <div class="p-head"><div><span class="today-chip">${pIcon("calendario").replace("<svg", '<svg width="14" height="14"')}${(f => f[0].toUpperCase() + f.slice(1))(fechaLarga(ymd(new Date())))}</span><br><span class="eyebrow">Hola, María</span><h1>${tab === "calendario" ? "Tu semana" : "Tu studio en números"}</h1>
       <p class="p-sub">${st.proximas.length ? `<span class="pill warn">${st.proximas.length} hora${st.proximas.length > 1 ? "s" : ""} pendiente${st.proximas.length > 1 ? "s" : ""}</span> ` : ""}${DEMO ? "Modo demo: datos de ejemplo, sin conexión a Supabase." : `Conectada como ${esc(acc.email)}.`}${acc.admin === null ? " Falta correr <b>supabase/migraciones/002_calendario_y_avisos.sql</b>." : ""}</p></div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${DEMO ? `<span class="pill">Datos de ejemplo</span><button class="btn sm ghost" id="reset">Restablecer ejemplo</button>` : `<button class="btn sm ghost" id="logout">Cerrar sesión</button>`}</div></div>
-    <div class="tabs" role="tablist">${[["calendario","Calendario"],["resumen","Resumen"],["reservas","Reservas e historial"],["servicios","Servicios"],["clientas","Clientas y fidelidad"],["jornada","Jornada laboral"]].map(([k, l]) => `<button class="tab" role="tab" data-tab="${k}" aria-selected="${tab === k}">${pIcon(k)}${l}</button>`).join("")}</div>
     ${body}
+    </div>
   </div></main>`;
   return st;
 }
@@ -1446,7 +1495,9 @@ document.addEventListener("click", async e => {
   const car = t.closest("[data-car]"); if (car) { const c = document.getElementById("car"), card = c.querySelector(".sc"); c.scrollBy({ left: +car.dataset.car * (card ? card.offsetWidth + 18 : 300), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); return; }
   const cat = t.closest("[data-catalogo]"); if (cat) { const sec = cat.closest(".svc-sec"), all = sec.classList.toggle("all"); cat.setAttribute("aria-expanded", all); cat.textContent = all ? "Ver menos" : "Ver todos los servicios"; if (!all) sec.scrollIntoView({ block: "start" }); return; }
   if (t.matches("[data-copy]")) { const txt = document.getElementById("wa-msg").textContent; try { await navigator.clipboard.writeText(txt); toast("Mensaje copiado"); } catch (_) { const r = document.createRange(); r.selectNodeContents(document.getElementById("wa-msg")); getSelection().removeAllRanges(); getSelection().addRange(r); toast("Mensaje seleccionado: cópialo con Ctrl+C"); } return; }
-  const tb = t.closest("[data-tab]"); if (tb) { tab = tb.dataset.tab; filtro.q = ""; confirmDel = null; jorBorrador = null; return renderPanel(); }
+  if (t.closest("[data-menu-cerrar]")) return menuPanel(false);
+  if (t.closest("[data-menu]")) return menuPanel();
+  const tb = t.closest("[data-tab]"); if (tb) { menuAbierto = false; tab = tb.dataset.tab; filtro.q = ""; confirmDel = null; jorBorrador = null; return renderPanel(); }
   if (t.dataset.estado) { await db.cambiarEstado(t.dataset.id, t.dataset.estado); confirmCancel = null; if (t.closest(".modal")) closeBooking(); toast(t.dataset.estado === "completada" ? "Marcada como completada" : "Hora cancelada, el bloque quedó libre"); return renderPanel(); }
   const sem = t.closest("[data-semana]"); if (sem) { const k = +sem.dataset.semana; semana = k ? addDays(semana, 7 * k) : lunesDe(new Date()); diaMovil = null; return renderPanel(); }
   const dia = t.closest("[data-dia]"); if (dia) { diaMovil = dia.dataset.dia; return renderPanel(); }
@@ -1513,7 +1564,7 @@ document.addEventListener("dragend", () => document.querySelectorAll(".dragging,
 document.addEventListener("dragover", e => { const c = e.target.closest?.("[data-drop]"); if (!c) return; e.preventDefault(); document.querySelectorAll(".drop-ok").forEach(x => x !== c && x.classList.remove("drop-ok")); c.classList.add("drop-ok"); });
 document.addEventListener("drop", e => { const c = e.target.closest?.("[data-drop]"); if (!c) return; e.preventDefault(); const id = e.dataTransfer.getData("text/plain"); const [f, h] = c.dataset.drop.split("|"); if (id) moverReserva(id, f, +h); });
 window.addEventListener("unhandledrejection", e => { toast("No se pudo completar: " + (e.reason?.message || "revisa tu conexión")); });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && layer.innerHTML) closeBooking(); });
+document.addEventListener("keydown", e => { if (e.key !== "Escape") return; if (layer.innerHTML) return closeBooking(); if (menuAbierto) menuPanel(false); });
 
 if (DEMO) load();
 db.jornada().then(aplicarJornada).catch(() => {}).then(route).catch(() => {}).finally(ocultarCarga);
